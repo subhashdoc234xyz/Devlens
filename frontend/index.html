@@ -146,109 +146,87 @@
             box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.2);
         }
 
-        button {
-            background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
-            color: white;
-            border: none;
-            padding: 14px 28px;
-            border-radius: 12px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
-            box-shadow: 0 4px 12px rgba(2, 132, 199, 0.3);
-            align-self: center;
-            width: 250px;
+        .button-group {
             display: flex;
+            gap: 16px;
             justify-content: center;
-            align-items: center;
-            gap: 8px;
+            flex-wrap: wrap;
         }
 
-        button:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 16px rgba(2, 132, 199, 0.4);
+        button.run-btn {
+            background: linear-gradient(135deg, #0f172a 0%, #334155 100%);
+            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.3);
         }
 
-        button:active:not(:disabled) {
-            transform: translateY(0);
+        button.run-btn:hover:not(:disabled) {
+            box-shadow: 0 6px 16px rgba(15, 23, 42, 0.4);
         }
 
-        button:disabled {
-            background: #94a3b8;
-            cursor: not-allowed;
-            transform: none;
-            box-shadow: none;
-            opacity: 0.8;
-        }
-
-        /* Spinner for loading state */
-        .spinner {
-            display: none;
-            width: 20px;
-            height: 20px;
-            border: 3px solid rgba(255,255,255,0.3);
-            border-radius: 50%;
-            border-top-color: #fff;
-            animation: spin 1s ease-in-out infinite;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        .result-container {
+        /* Terminal Style */
+        .terminal-container {
             display: none;
             flex-direction: column;
-            gap: 16px;
-            margin-top: 16px;
-            animation: fadeIn 0.5s ease-out;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .result-card {
-            background: rgba(255, 255, 255, 0.5);
-            border: 1px solid var(--glass-border);
+            background: #0f172a;
             border-radius: 12px;
             padding: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            transition: transform 0.3s ease, background 0.3s ease;
-        }
-        
-        .result-card:hover {
-            transform: scale(1.02);
-            background: rgba(255, 255, 255, 0.6);
+            font-family: 'Fira Code', monospace;
+            font-size: 14px;
+            color: #f8fafc;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.5);
+            margin-top: 24px;
+            max-height: 400px;
+            overflow-y: auto;
+            position: relative;
         }
 
-        .result-title {
-            font-weight: 700;
-            font-size: 0.85rem;
+        .terminal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 8px;
+            color: #94a3b8;
+            font-size: 0.75rem;
             text-transform: uppercase;
             letter-spacing: 1px;
-            color: #0284c7;
         }
 
-        .result-body {
-            font-size: 1.05rem;
-            line-height: 1.5;
-            color: #0f172a;
+        .terminal-body {
+            white-space: pre-wrap;
+            line-height: 1.6;
         }
-        
-        .error-message {
-            color: #b91c1c;
-            background: #fee2e2;
-            padding: 12px;
-            border-radius: 8px;
-            border: 1px solid #fca5a5;
+
+        .terminal-cursor {
+            display: inline-block;
+            width: 8px;
+            height: 18px;
+            background: #38bdf8;
+            margin-left: 4px;
+            vertical-align: middle;
+            animation: blink 1s step-end infinite;
+        }
+
+        @keyframes blink {
+            50% { opacity: 0; }
+        }
+
+        .terminal-input-line {
             display: none;
-            font-size: 0.95rem;
-            animation: fadeIn 0.3s ease-out;
+            align-items: center;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .terminal-input-line input {
+            background: transparent;
+            border: none;
+            color: #38bdf8;
+            font-family: inherit;
+            font-size: inherit;
+            outline: none;
+            flex-grow: 1;
         }
 
         /* Responsive */
@@ -269,18 +247,24 @@
     <div class="glass-panel">
         <header>
             <h1>Devlens</h1>
-            <p>AI-Powered Code Analyzer</p>
+            <p>AI-Powered Code Analyzer & Console</p>
         </header>
 
         <div class="input-group">
-            <label for="codeInput">Paste your code below to instantly understand it:</label>
-            <textarea id="codeInput" placeholder="def find_max(arr):&#10;    max_val = arr[0]&#10;    for num in arr:&#10;        if num > max_val:&#10;            max_val = num&#10;    return max_val"></textarea>
+            <label for="codeInput">Paste your code below to instantly understand or run it:</label>
+            <textarea id="codeInput" placeholder="name = input('Name: ')&#10;print(f'Hello {name}!')"></textarea>
         </div>
 
-        <button id="analyzeBtn">
-            <span>Analyze Code</span>
-            <div class="spinner" id="spinner"></div>
-        </button>
+        <div class="button-group">
+            <button id="analyzeBtn">
+                <span>Analyze Code</span>
+                <div class="spinner"></div>
+            </button>
+            <button id="runBtn" class="run-btn">
+                <span>Run Code</span>
+                <div class="spinner"></div>
+            </button>
+        </div>
         
         <div id="errorMsg" class="error-message"></div>
 
@@ -300,69 +284,127 @@
                 <div class="result-body" id="resIssues">...</div>
             </div>
         </div>
+
+        <div class="terminal-container" id="terminalContainer">
+            <div class="terminal-header">
+                <span>Console Output (AI Simulated)</span>
+                <span id="terminalStatus">Ready</span>
+            </div>
+            <div class="terminal-body" id="terminalOutput"></div>
+            <div class="terminal-input-line" id="terminalInputArea">
+                <span id="terminalPrompt">> </span>
+                <input type="text" id="terminalInput" autofocus>
+            </div>
+        </div>
     </div>
 
     <script>
+        let currentInputs = [];
+
+        // Analyzer Logic
         document.getElementById('analyzeBtn').addEventListener('click', async () => {
+            handleAction('analyze');
+        });
+
+        // Runner Logic
+        document.getElementById('runBtn').addEventListener('click', async () => {
+            currentInputs = [];
+            document.getElementById('terminalOutput').textContent = '';
+            handleAction('simulate');
+        });
+
+        async function handleAction(type) {
             const code = document.getElementById('codeInput').value;
-            const btn = document.getElementById('analyzeBtn');
+            const btn = type === 'analyze' ? document.getElementById('analyzeBtn') : document.getElementById('runBtn');
             const btnText = btn.querySelector('span');
-            const spinner = document.getElementById('spinner');
+            const spinner = btn.querySelector('.spinner');
             const resultContainer = document.getElementById('resultContainer');
+            const terminalContainer = document.getElementById('terminalContainer');
             const errorMsg = document.getElementById('errorMsg');
             
-            // Check empty input
             if (!code.trim()) {
-                errorMsg.textContent = "Please enter some code to analyze.";
+                errorMsg.textContent = "Please enter some code first.";
                 errorMsg.style.display = "block";
                 return;
             }
 
-            // Reset UI states
             errorMsg.style.display = "none";
-            resultContainer.style.display = "none";
             btn.disabled = true;
-            btnText.textContent = "Analyzing...";
             spinner.style.display = "block";
+            const originalText = btnText.textContent;
+            btnText.textContent = type === 'analyze' ? "Analyzing..." : "Executing...";
 
             try {
-                // Connect to local Flask Backend
-                const response = await fetch('http://localhost:8000/api/analyze', {
+                const endpoint = type === 'analyze' ? '/api/analyze' : '/api/simulate';
+                const body = type === 'analyze' ? { code } : { code, inputs: currentInputs };
+
+                const response = await fetch(`http://localhost:8000${endpoint}`, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ code: code })
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body)
                 });
 
                 const data = await response.json();
+                if (!response.ok) throw new Error(data.error || 'Request failed.');
 
-                if (!response.ok) {
-                    throw new Error(data.error || 'Failed to analyze code.');
+                if (type === 'analyze') {
+                    terminalContainer.style.display = "none";
+                    document.getElementById('resExplanation').textContent = data.explanation;
+                    document.getElementById('resComplexity').textContent = data.complexity;
+                    document.getElementById('resIssues').textContent = data.issues;
+                    resultContainer.style.display = "flex";
+                } else {
+                    resultContainer.style.display = "none";
+                    terminalContainer.style.display = "flex";
+                    updateTerminal(data);
                 }
-
-                // Handle Output
-                document.getElementById('resExplanation').textContent = data.explanation || "No explanation provided.";
-                document.getElementById('resComplexity').textContent = data.complexity || "Unknown complexity.";
-                document.getElementById('resIssues').textContent = data.issues || "None detected.";
-                
-                resultContainer.style.display = "flex";
 
             } catch (err) {
-                // If backend is not started or CORS error
-                if(err.message === 'Failed to fetch') {
-                    errorMsg.textContent = "Cannot connect to backend. Please ensure the Python Flask server is running on localhost:8000.";
-                } else {
-                    errorMsg.textContent = err.message;
-                }
+                errorMsg.textContent = err.message === 'Failed to fetch' ? "Backend not reachable." : err.message;
                 errorMsg.style.display = "block";
             } finally {
-                // Stop Loading
                 btn.disabled = false;
-                btnText.textContent = "Analyze Code";
+                btnText.textContent = originalText;
                 spinner.style.display = "none";
+            }
+        }
+
+        function updateTerminal(data) {
+            const output = document.getElementById('terminalOutput');
+            const statusLabel = document.getElementById('terminalStatus');
+            const inputArea = document.getElementById('terminalInputArea');
+            const promptLabel = document.getElementById('terminalPrompt');
+            const inputField = document.getElementById('terminalInput');
+
+            output.textContent = data.output;
+            
+            if (data.status === 'waiting_for_input') {
+                statusLabel.textContent = "Waiting for input...";
+                promptLabel.textContent = data.prompt || "> ";
+                inputArea.style.display = "flex";
+                inputField.focus();
+            } else {
+                statusLabel.textContent = "Finished";
+                inputArea.style.display = "none";
+            }
+            
+            // Auto-scroll
+            const container = document.getElementById('terminalContainer');
+            container.scrollTop = container.scrollHeight;
+        }
+
+        document.getElementById('terminalInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                const val = e.target.value;
+                currentInputs.push(val);
+                e.target.value = '';
+                document.getElementById('terminalInputArea').style.display = "none";
+                handleAction('simulate');
             }
         });
     </script>
+</body>
+</html>
+
 </body>
 </html>

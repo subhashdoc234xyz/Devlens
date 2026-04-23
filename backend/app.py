@@ -36,6 +36,22 @@ Return your analysis strictly as a JSON object with three keys:
 IMPORTANT: Do not return any text other than the JSON object. Do not use markdown backticks.
 """
 
+# System instruction for simulation
+simulation_instruction = """
+You are a virtual machine and console simulator. The user will provide a code snippet and optionally some 'stdin' (user input). 
+Your task is to simulate the execution of this code and return the console output.
+
+Rules:
+1. Return a JSON object with: 
+   - "output": The text that would be printed to the console.
+   - "status": "finished" if the code completes, OR "waiting_for_input" if the code reaches an input() or similar prompt.
+   - "prompt": If status is "waiting_for_input", provide the specific prompt text (e.g., "Enter your name: ").
+
+2. If the user provides 'stdin', use those values in order for any input prompts encountered.
+3. Be extremadamente accurate about the code logic. If there is a bug that would cause a crash, return the simulated traceback in "output" and status "finished".
+4. Do not include markdown formatting or backticks.
+"""
+
 @app.route('/api/analyze', methods=['POST'])
 def analyze():
     if not api_key or api_key == "YOUR_GEMINI_API_KEY_HERE":
@@ -57,7 +73,7 @@ def analyze():
         chat_session = model.start_chat()
         response = chat_session.send_message(code_snippet)
         
-        # Parse output safely in case the model decides to wrap it in markdown block.
+        # Parse output safely
         response_text = response.text.strip()
         if response_text.startswith("```json"):
             response_text = response_text[7:]
@@ -66,6 +82,39 @@ def analyze():
             
         result = json.loads(response_text)
         return jsonify(result)
+        
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/simulate', methods=['POST'])
+def simulate():
+    if not api_key or api_key == "YOUR_GEMINI_API_KEY_HERE":
+        return jsonify({"error": "Gemini API Key missing!"}), 500
+
+    data = request.json
+    code = data.get("code")
+    inputs = data.get("inputs", []) # List of strings provided by user so far
+
+    prompt_context = f"Code:\n{code}\n\nInputs provided so far: {inputs}"
+
+    try:
+        model = genai.GenerativeModel(
+            model_name="gemini-2.5-flash",
+            generation_config=generation_config,
+            system_instruction=simulation_instruction
+        )
+        
+        chat_session = model.start_chat()
+        response = chat_session.send_message(prompt_context)
+        
+        response_text = response.text.strip()
+        if response_text.startswith("```json"):
+            response_text = response_text[7:]
+        if response_text.endswith("```"):
+            response_text = response_text[:-3]
+            
+        return jsonify(json.loads(response_text))
         
     except Exception as e:
         traceback.print_exc()
