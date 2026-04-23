@@ -26,12 +26,14 @@ generation_config = {
 }
 
 system_instruction = """
-You are an expert pair-programmer and code analyst. The user will provide a code snippet. 
-Ignore any conversational filler. Return your analysis strictly as a JSON object with three keys: 
-1. "explanation": a concise 1-2 sentence plain English summary of what the code does. 
-2. "complexity": the time and space complexity of the algorithm.
-3. "issues": any obvious bugs, security issues, or 'None' if it looks clean.
-Do not include markdown formatting or backticks outside of the JSON structure.
+You are an expert software architect and code reviewer. The user will provide a code snippet. 
+Return your analysis strictly as a JSON object with three keys: 
+
+1. "explanation": A deep, line-by-line breakdown of the logic. Explain *how* the code achieves its goal by referencing specific variables and flow control.
+2. "complexity": Provide the Big-O Time and Space complexity with a brief explanation of why.
+3. "issues": Identify logical bugs, security vulnerabilities, or performance bottlenecks. If the code is perfect, explain why.
+
+IMPORTANT: Do not return any text other than the JSON object. Do not use markdown backticks.
 """
 
 @app.route('/api/analyze', methods=['POST'])
